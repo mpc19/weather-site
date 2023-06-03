@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans&display=swap">
+  <title>Weather App</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-size: cover;
+      background-position: center;
+      font-family: 'Noto Sans', Arial, Helvetica, sans-serif;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: #fff;
+      text-align: center;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .container h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+    
+    .container p {
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+    }
+
+    .container p img {
+      width: 50px;
+      height: 50px;
+      margin-right: 10px;
+    }
+    
+    .container input[type="text"] {
+      padding: 10px;
+      font-size: 18px;
+      border-radius: 24px;
+    }
+    
+    .container button {
+      padding: 10px 20px;
+      margin-top: 5px;
+      font-size: 18px;
+      background-color: #fff;
+      color: #000;
+      border: none;
+      cursor: pointer;
+      border-radius: 12px;
+    }
+
+    .container button:hover {
+      opacity: 0.9;
+      scale: 0.99;
+      transition: all 500ms;
+    }
+
+    #weatherDescription {
+      margin-top: -22px;
+    }
+
+    
+  </style>
+</head>
+<body>
+  <div class="container">
+     <!--Heading-->
+    <h1>Weather App</h1>
+
+    <!--seach box-->
+    <input type="text" id="locationInput" placeholder="Enter location">
+    <!--Click to search-->
+    <button onclick="getWeather()">Get Weather</button>
+
+    <!--Placeholders updated by getWeather()-->
+    <p id="weatherInfo"></p>
+    <p id="weatherDescription"></p>
+  </div>
+  <script>
+    
+    // The cool function
+    function getWeather() {
+      // my api key for openweathermap
+      let apiKey = "2d80fb5fd058ac7ba041f3ce2eb9171d"; 
+      var location = document.getElementById("locationInput").value;
+      
+      // fetch weather 
+      fetch("https://api.openweathermap.org/data/2.5/weather?q=" + location + "&units=metric&appid=" + apiKey)
+        .then(response => response.json())
+        .then(data => {
+          handleData(data);
+        })
+        .catch(error => {
+          console.log("Error fetching weather data:", error);
+          document.getElementById("weatherInfo").textContent = "Error fetching weather data: " + error;
+        });
+      
+      // get a random background image from unsplash
+      // client id = API key for Unsplash.com 
+      // which is called the 'Access Key' on Unsplash
+      // poor design but it is
+      fetch("https://api.unsplash.com/search/photos?query=" + location + "&client_id=Py0M-L6zOy4_G7hKCOW7b_hhQyLyOcKYqQmUcruKvYA")
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+
+          // pick one of five images from the search.
+          let random = Math.floor(Math.random() * 5);
+
+          // get full image, slow loading for certain people but high quality :D
+          var backgroundImage = data.results[Number.parseInt(random)].urls.full;
+          document.body.style.backgroundImage = `url(${backgroundImage})`;
+        })
+        .catch(error => {
+          console.log("Error fetching background image:", error);
+          document.body.style.backgroundColor = "#000";
+        });
+    }
+
+    // parse data from response
+    function handleData(data) {
+      console.log(data);
+      let name = data.name, speed = data.wind.speed;
+      let { icon, description } = data.weather[0];
+      let temp = data.main.temp, humidity = data.main.humidity;
+
+      // update weather info
+      document.getElementById("weatherInfo").innerHTML = `<img src="https://openweathermap.org/img/wn/${icon}.png" alt="Weather Icon">${temp}°C in ${name}`
+      // update weather description
+      document.getElementById("weatherDescription").textContent = weatherType(data) + ", winds of " + speed + "km/h with a humidity of " + humidity + "%"
+    }
+
+    function weatherType(data) {
+      switch(data.weather[0].main) {
+        case "Clear":
+          return "Clear";
+        case "Clouds":
+          if(data.weather[0].id < 803)
+            return "Slightly Cloudy"
+          else 
+            return "Overcast"
+        case "Rain":
+          let id = data.weather[0].id;
+          if(id == 500 || id == 520) 
+          return "Light Rain";
+          else if(id == 503 || id == 504 || id == 522) 
+          return "Heavy Rain";
+          else
+          return "Raining"
+        case "Thunderstorm":
+          return "Stormy";
+        case "Drizzle":
+          return "Light Showers";
+        case "Snow":
+          return "Snow";
+        case "Mist":
+          return "Misty";
+        case "Fog":
+          return "Foggy";
+        case "Smoke":
+          return "Smoky";
+        case "Dust":
+          return "Dusty";
+        default:
+          return "Cloudy";
+      }
+    }
+
+    // load default weather  for southampton
+    window.addEventListener('DOMContentLoaded', function() {
+      document.getElementById("locationInput").value = "Southampton";
+      getWeather();
+    });
+
+  </script>
+</body>
+</html>
