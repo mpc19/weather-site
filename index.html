@@ -1,7 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans&display=swap">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A weather app made using the OpenWeather API">
+ <async link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans&display=swap"> 
   <title>Weather App</title>
   <style>
     body {
@@ -116,7 +119,15 @@
           let random = Math.floor(Math.random() * 5);
 
           // get full image, slow loading for certain people but high quality :D
-          var backgroundImage = data.results[Number.parseInt(random)].urls.full;
+          var screenWidth = window.innerWidth;
+          var backgroundImage = data.results[Number.parseInt(random)].urls.thumb;
+          if(screenWidth <= 800) {
+            backgroundImage = data.results[Number.parseInt(random)].urls.small;
+          } else if(screenWidth <= 1920) {
+            backgroundImage = data.results[Number.parseInt(random)].urls.regular;
+          } else {
+            backgroundImage = data.results[Number.parseInt(random)].urls.full;
+          }
           document.body.style.backgroundImage = `url(${backgroundImage})`;
         })
         .catch(error => {
